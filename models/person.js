@@ -9,7 +9,7 @@ mongoose
     console.log("Connected to MongoDB");
   })
   .catch((e) => {
-    console.error("Error connecting to MongoDB:", error.message);
+    console.error("Error connecting to MongoDB:", e.message);
   });
 
 const personsSchema = mongoose.Schema({
