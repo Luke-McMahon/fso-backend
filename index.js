@@ -89,19 +89,29 @@ app.delete("/api/persons/:id", (request, response) => {
 
 app.put("/api/persons/:id", (request, response, next) => {
   const body = request.body;
-
-  const person = {};
+  console.log(body);
+  Person.findByIdAndUpdate(
+    request.params.id,
+    { number: body.number },
+    { new: true }
+  )
+    .then((result) => {
+      response.json(result);
+    })
+    .catch((e) => next(e));
 });
 
 app.get("/info", (request, response) => {
-  const info = `Phonebook has info for ${people.length} people`;
-  const date = new Date();
+  Person.find({}).then((people) => {
+    const info = `Phonebook has info for ${people.length} people`;
+    const date = new Date();
 
-  const data = `<p>${info}</p>
-  <p>${date.toString()}</p>
-  `;
+    const data = `<p>${info}</p>
+    <p>${date.toString()}</p>
+    `;
 
-  response.send(data);
+    return response.send(data);
+  });
 });
 
 const errorHandler = (error, request, response, next) => {
