@@ -45,36 +45,25 @@ app.get("/api/persons/:id", (request, response, next) => {
 app.post("/api/persons", (request, response, next) => {
   const body = request.body;
 
-  if (!body.name) {
-    return response.status(400).json({
-      error: "Persons name is missing",
-    });
-  }
-
-  if (!body.number) {
-    return response.status(400).json({
-      error: "Persons number is missing",
-    });
-  }
-
-  Person.find({})
-    .then((people) => {
-      const exists = people.some((p) => p.name === body.name);
-      if (exists) {
-        return response.status(400).json({
-          error: "Name must be unique",
-        });
-      }
-      const newPerson = new Person({
-        name: body.name,
-        number: body.number,
+  Person.find({}).then((people) => {
+    const exists = people.some((p) => p.name === body.name);
+    if (exists) {
+      return response.status(400).json({
+        error: "Name must be unique",
       });
+    }
+    const newPerson = new Person({
+      name: body.name,
+      number: body.number,
+    });
 
-      newPerson.save().then((savedPerson) => {
+    newPerson
+      .save()
+      .then((savedPerson) => {
         response.json(savedPerson);
-      });
-    })
-    .catch((e) => next(e));
+      })
+      .catch((e) => next(e));
+  });
 });
 
 app.delete("/api/persons/:id", (request, response) => {
@@ -88,12 +77,11 @@ app.delete("/api/persons/:id", (request, response) => {
 });
 
 app.put("/api/persons/:id", (request, response, next) => {
-  const body = request.body;
-  console.log(body);
+  const { name, number } = request.body;
   Person.findByIdAndUpdate(
     request.params.id,
-    { number: body.number },
-    { new: true }
+    { number: number },
+    { new: true, runValidators: true, context: "query" }
   )
     .then((result) => {
       response.json(result);
@@ -121,6 +109,9 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: "malformatted id" });
   }
 
+  if (error.name === "ValidationError") {
+    return response.status(400).send({ error: error.message });
+  }
   return next(error);
 };
 
