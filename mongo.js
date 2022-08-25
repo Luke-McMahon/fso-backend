@@ -20,7 +20,7 @@ const peopleSchema = mongoose.Schema({
 const Person = mongoose.model("person", peopleSchema);
 
 const getPhonebook = () => {
-  mongoose.connect(url).then((res) => {
+  mongoose.connect(url).then(() => {
     Person.find({}).then((result) => {
       let phonebook = "Phonebook:\n";
       result.forEach((p) => {
@@ -40,7 +40,7 @@ if (process.argv.length === 3) {
 if (process.argv.length === 5) {
   mongoose
     .connect(url)
-    .then((res) => {
+    .then(() => {
       console.log("Connected");
     })
     .then(() => {

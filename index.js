@@ -2,20 +2,15 @@ require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
-const mongoose = require("mongoose");
 
 const app = express();
 app.use(express.json());
 app.use(express.static("build"));
 app.use(cors());
 
-const password = process.env.DB_PASSWORD;
-const database = process.env.DB_NAME;
-const url = `mongodb+srv://fullstack:${password}@cluster0.thyjmzk.mongodb.net/${database}?retryWrites=true&w=majority`;
-
 const Person = require("./models/person");
 
-morgan.token("body", (req, res) => JSON.stringify(req.body));
+morgan.token("body", (req) => JSON.stringify(req.body));
 app.use(
   morgan(
     ":method :url :status :response-time ms - :res[content-length] :body - :req[content-length]"
@@ -66,21 +61,19 @@ app.post("/api/persons", (request, response, next) => {
   });
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
-    .then((result) => {
+    .then(() => {
       response.status(204).end();
     })
-    .catch((e) => {
-      next(e);
-    });
+    .catch((e) => next(e));
 });
 
 app.put("/api/persons/:id", (request, response, next) => {
   const { name, number } = request.body;
   Person.findByIdAndUpdate(
     request.params.id,
-    { number: number },
+    { name: name, number: number },
     { new: true, runValidators: true, context: "query" }
   )
     .then((result) => {
